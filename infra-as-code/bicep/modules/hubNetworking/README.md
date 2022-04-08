@@ -12,47 +12,64 @@ Module deploys the following resources:
 - DDos Standard Plan
 - Bastion
 
-## Parameters
+## Module Resource Deployment Parameters
 
 The module requires the following inputs:
 
- | Parameter                     | Type   | Default                                                                                              | Description                                                                                                                                                                                                                                                                                                                                                                                                                               | Requirement                   | Example                      |
- | ----------------------------- | ------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ---------------------------- |
- | parLocation                     | string | `resourceGroup().location`                                                                           | The Azure Region to deploy the resources into                                                                                                                                                                                                                                                                                                                                                                                             | None                          | `eastus`                     |
- | parBastionEnabled             | bool   | true                                                                                                 | Switch to enable deployment of Bastion Service                                                                                                                                                                                                                                                                                                                                                                                            | None                          | true                         |
- | parDdosEnabled                | bool   | true                                                                                                 | Switch to enable deployment of distributed denial of service attacks service                                                                                                                                                                                                                                                                                                                                                              | None                          | true                         |
- | parAzureFirewallEnabled       | bool   | true                                                                                                 | Switch to enable deployment of Azure Firewall                                                                                                                                                                                                                                                                                                                                                                                             | None                          | true                         |
- | parPrivateDNSZonesEnabled     | bool   | true                                                                                                 | Switch to enable deployment of Azure Private DNS Zones                                                                                                                                                                                                                                                                                                                                                                                    | None                          | true                         |
- | parPrivateDnsZones            | array  | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Array of DNS Zones to provision in Hub Virtual Network. Default: All known Azure Private DNS Zones except for: `privatelink.batch.azure.com`, `privatelink.azmk8s.io` and `privatelink.siterecovery.windowsazure.com` as these are region specific, which you can add to the parameters file with the required region in the zone name that you wish to deploy for. For more details on private DNS Zones please refer to the above link. | None                          | See Default                  |
- | parCompanyPrefix              | string | alz                                                                                                  | Prefix value which will be pre-appended to all resource names                                                                                                                                                                                                                                                                                                                                                                             | 1-10 char                     | alz                          |
- | parDdosPlanName               | string | ${parCompanyPrefix}-ddos-plan                                                                        | Name which will be associated with distributed denial of service protection plan                                                                                                                                                                                                                                                                                                                                                          | 1-80 char                     | alz-ddos-plan                |
- | parBastionName                | string | ${parCompanyPrefix}-bastion                                                                          | Name which will be associated with Bastion Service.                                                                                                                                                                                                                                                                                                                                                                                       | 1-80 char                     | alz-bastion                  |
- | parBastionSku                 | string | Standard                                                                                             | SKU or Tier of Bastion Service to deploy                                                                                                                                                                                                                                                                                                                                                                                                  | Standard or Basic             | Standard                     |
- | parPublicIPSku                | string | Standard                                                                                             | SKU or Tier of Public IP to deploy                                                                                                                                                                                                                                                                                                                                                                                                        | Standard or Basic             | Standard                     |
- | parTags                       | object | Empty Array []                                                                                       | List of tags (Key Value Pairs) to be applied to resources                                                                                                                                                                                                                                                                                                                                                                                 | None                          | environment: 'development'   |
- | parHubNetworkAddressPrefix    | string | 10.10.0.0/16                                                                                         | CIDR range for Hub Network                                                                                                                                                                                                                                                                                                                                                                                                                | CIDR Notation                 | 10.10.0.0/16                 |
- | parHubNetworkName             | string | `${parCompanyPrefix}-hub-${parLocation}`                                                 | Name prefix for Virtual Network.  Prefix will be appended with the region.                                                                                                                                                                                                                                                                                                                                                                | 2-50 char                     | alz-hub-eastus              |
- | parAzureFirewallName          | string | `${parCompanyPrefix}-azure-firewall`                                                                  | Name associated with Azure Firewall                                                                                                                                                                                                                                                                                                                                                                                                       | 1-80 char                     | alz-azure-firewall           |
- | parAzureFirewallTier          | string | Standard                                                                                             | Tier associated with the Firewall to be deployed.                                                                                                                                                                                                                                                                                                                                                                                         | Standard or Premium           | Premium                      |
- | parHubRouteTableName          | string | `${parCompanyPrefix}-hub-routetable`                                                                   | Name of route table to be associated with Hub Network                                                                                                                                                                                                                                                                                                                                                                                     | 1-80 char                     | alz-hub-routetable           |
- | parVpnGatewayConfig           | object | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Configuration for VPN virtual network gateway to be deployed. If a VPN virtual network gateway is not desired an empty object should be used as the input parameter in the parameter file, i.e. "parVpnGatewayConfig": {"value": {} }'''                                                                                                                                                                                                  | None                          | See Default                  |
- | parExpressRouteGatewayConfig  | object | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Configuration for ExpressRoute virtual network gateway to be deployed. If a ExpressRoute virtual network gateway is not desired an empty object should be used as the input parameter in the parameter file, i.e. "parExpressRouteGatewayConfig": {"value": {} }'''                                                                                                                                                                       | None                          | See Default                  |
- | parSubnets                    | array  | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Array of objects to provide for a dynamic set of subnets                                                                                                                                                                                                                                                                                                                                                                                  | Must provide array of objects | See Default                  |
- | parDNSServerIPArray           | array  | Empty Array []                                                                                       | Array of DNS Server IP addresses for VNet.                                                                                                                                                                                                                                                                                                                                                                                                | None                          | `['10.10.1.4', '10.10.2.4']` |
- | parNetworkDNSEnableProxy      | bool   | true                                                                                                 | Switch which enables DNS Proxy to be enabled on the Azure Firewall                                                                                                                                                                                                                                                                                                                                                                        | None                          | true                         |
- | parDisableBGPRoutePropagation | bool   | false                                                                                                | Switch which allows BGP Propagation to be disabled on the route tables                                                                                                                                                                                                                                                                                                                                                                    | None                          | false                        |
- | parTelemetryOptOut            | bool   | false                                                                                                | Set Parameter to true to Opt-out of deployment telemetry                                                                                                                                                                                                                                                                                                                                                                                  | None                          | false                        |
+| Parameter | Type | Default | Description | Requirement | Example |
+|-|-|-|-|-|-|
+| parLocation | string | `resourceGroup().location` | The Azure Region to deploy the resources into | None | `eastus` |
+| parBastionEnabled | bool | true | Switch to enable deployment of Bastion Service | None | true |
+| parDdosEnabled | bool | true | Switch to enable deployment of distributed denial of service attacks service | None | true |
+| parAzureFirewallEnabled | bool | true | Switch to enable deployment of Azure Firewall | None | true |
+| parPrivateDNSZonesEnabled | bool | true | Switch to enable deployment of Azure Private DNS Zones | None | true |
+| parPrivateDnsZones | array | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Array of DNS Zones to provision in Hub Virtual Network. Default: All known Azure Private DNS Zones except for: `privatelink.batch.azure.com`, `privatelink.azmk8s.io` and `privatelink.siterecovery.windowsazure.com` as these are region specific, which you can add to the parameters file with the required region in the zone name that you wish to deploy for. For more details on private DNS Zones please refer to the above link. | None | See Default |
+| parCompanyPrefix | string | alz | Prefix value which will be pre-appended to all resource names | 1-10 char | alz |
+| parDdosPlanName | string | ${parCompanyPrefix}-ddos-plan | Name which will be associated with distributed denial of service protection plan | 1-80 char | alz-ddos-plan |
+| parBastionName | string | ${parCompanyPrefix}-bastion | Name which will be associated with Bastion Service. | 1-80 char | alz-bastion |
+| parBastionSku | string | Standard | SKU or Tier of Bastion Service to deploy | Standard or Basic | Standard |
+| parPublicIPSku | string | Standard | SKU or Tier of Public IP to deploy | Standard or Basic | Standard |
+| parTags | object | Empty Array [] | List of tags (Key Value Pairs) to be applied to resources | None | environment: 'development' |
+| parHubNetworkAddressPrefix | string | 10.10.0.0/16 | CIDR range for Hub Network | CIDR Notation | 10.10.0.0/16 |
+| parHubNetworkName | string | `${parCompanyPrefix}-hub-${parLocation}` | Name prefix for Virtual Network.  Prefix will be appended with the region. | 2-50 char | alz-hub-eastus |
+| parAzureFirewallName | string | `${parCompanyPrefix}-azure-firewall` | Name associated with Azure Firewall | 1-80 char | alz-azure-firewall |
+| parAzureFirewallTier | string | Standard | Tier associated with the Firewall to be deployed. | Standard or Premium | Premium |
+| parHubRouteTableName | string | `${parCompanyPrefix}-hub-routetable` | Name of route table to be associated with Hub Network | 1-80 char | alz-hub-routetable |
+| parVpnGatewayConfig | object | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Configuration for VPN virtual network gateway to be deployed. If a VPN virtual network gateway is not desired an empty object should be used as the input parameter in the parameter file, i.e. "parVpnGatewayConfig": {"value": {} }''' | None | See Default |
+| parExpressRouteGatewayConfig | object | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Configuration for ExpressRoute virtual network gateway to be deployed. If a ExpressRoute virtual network gateway is not desired an empty object should be used as the input parameter in the parameter file, i.e. "parExpressRouteGatewayConfig": {"value": {} }''' | None | See Default |
+| parSubnets | array | See example parameters file [`hubNetworking.parameters.json`](hubNetworking.parameters.example.json) | Array of objects to provide for a dynamic set of subnets | Must provide array of objects | See Default |
+| parDNSServerIPArray | array | Empty Array [] | Array of DNS Server IP addresses for VNet. | None | `['10.10.1.4', '10.10.2.4']` |
+| parNetworkDNSEnableProxy | bool | true | Switch which enables DNS Proxy to be enabled on the Azure Firewall | None | true |
+| parDisableBGPRoutePropagation | bool | false | Switch which allows BGP Propagation to be disabled on the route tables | None | false |
+| parTelemetryOptOut | bool | false | Set Parameter to true to Opt-out of deployment telemetry | None | false |
 
-## Outputs
+## Resource Group and Module Resource Deployment Parameters
+
+To deploy the resource group to which the resources from this module will be deployed, the following additional parameter(s) are available:
+
+| Parameter | Type | Default | Description | Requirement | Example |
+|-|-|-|-|-|-|
+| parResourceGroupName | string | `${parCompanyPrefix}-hub-${parLocation}` | Named Used for Hub Network Resource Group. | 1-90 char. Alphanumerics, underscores, parentheses, hyphens, periods, and unicode characters that match the [regex documentation](https://docs.microsoft.com/en-us/rest/api/resources/resourcegroups/createorupdate). Can't end with period. | HUB_Networking_POC |
+
+## Module Resource Deployment Outputs
 
 The module will generate the following outputs:
 
-| Output                    | Type   | Example                                                                                                                                                                                                  |
-| ------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| outAzureFirewallPrivateIP | string | 192.168.100.1                                                                                                                                                                                            |
-| outAzureFirewallName      | string | MyAzureFirewall                                                                                                                                                                                          |
-| outDdosPlanResourceId     | string | /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/HUB_Networking_POC/providers/Microsoft.Network/ddosProtectionPlans/alz-ddos-plan                                                      |
-| outPrivateDnsZones        | array  | `["name": "privatelink.azurecr.io", "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/net-lz-spk-eastus-rg/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"]` |
+| Output | Type | Example |
+|-|-|-|
+| outAzureFirewallPrivateIP | string | 192.168.100.1 |
+| outAzureFirewallName | string | MyAzureFirewall |
+| outDdosPlanResourceId | string | /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/HUB_Networking_POC/providers/Microsoft.Network/ddosProtectionPlans/alz-ddos-plan |
+| outPrivateDnsZones | array | `["name": "privatelink.azurecr.io", "id": "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/net-lz-spk-eastus-rg/providers/Microsoft.Network/privateDnsZones/privatelink.azurecr.io"]` |
+
+## Resource Group and Module Resource Deployment Outputs
+
+Deploying the resource group along with the resources as part of this module will result in the following additional outputs:
+
+| Output | Type | Example |
+|-|-|-|
+| outResourceGroupName | string | HUB_Networking_POC |
+| outResourceGroupId | string | /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/HUB_Networking_POC |
 
 ## Deployment
 > **Note:** `bicepconfig.json` file is included in the module directory.  This file allows us to override Bicep Linters.  Currently there are two URLs which were removed because of linter warnings.  URLs removed are the following: database.windows.net and core.windows.net
@@ -63,58 +80,53 @@ There are two different sets of input parameters; one for deploying to Azure glo
 - DDoS Protection feature is not available. parDdosEnabled parameter is set as false.
 - The SKUs available for an ExpressRoute virtual network gateway are Standard, HighPerformance and UltraPerformance. Sku is set as "Standard" in the example parameters file.
 
- | Azure Cloud    | Bicep template      | Input parameters file                    |
- | -------------- | ------------------- | ---------------------------------------- |
- | Global regions | hubNetworking.bicep | hubNetworking.parameters.example.json    |
- | China regions  | hubNetworking.bicep | mc-hubNetworking.parameters.example.json |
+| Azure Cloud | Bicep template | Input parameters file |
+|-|-|-|
+| Global regions | hubNetworking.bicep | hubNetworking.parameters.example.json |
+| China regions | hubNetworking.bicep | mc-hubNetworking.parameters.example.json |
 
 > For the examples below we assume you have downloaded or cloned the Git repo as-is and are in the root of the repository as your selected directory in your terminal of choice.
 
-### Azure CLI
+### Module Resources Only
+
+To deploy the module resources into a pre-created resource group, use one of the following options.
+
+#### Azure CLI
 ```bash
 # For Azure global regions
 # Set Platform connectivity subscription ID as the the current subscription 
-ConnectivitySubscriptionId="[your platform management subscription ID]"
+ConnectivitySubscriptionId="[your platform connectivity subscription ID]"
 az account set --subscription $ConnectivitySubscriptionId
-
-az group create --location eastus \
-   --name Hub_Networking_POC
 
 az deployment group create \
    --resource-group HUB_Networking_POC  \
-   --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
+   --template-file infra-as-code/bicep/modules/hubNetworking/resources/hubNetworking.bicep \
    --parameters @infra-as-code/bicep/modules/hubNetworking/hubNetworking.parameters.example.json
 ```
 OR
 ```bash
 # For Azure China regions
 # Set Platform connectivity subscription ID as the the current subscription 
-ConnectivitySubscriptionId="[your platform management subscription ID]"
+ConnectivitySubscriptionId="[your platform connectivity subscription ID]"
 az account set --subscription $ConnectivitySubscriptionId
-
-az group create --location chinaeast2 \
-   --name Hub_Networking_POC
 
 az deployment group create \
    --resource-group HUB_Networking_POC  \
-   --template-file infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep \
+   --template-file infra-as-code/bicep/modules/hubNetworking/resources/hubNetworking.bicep \
    --parameters @infra-as-code/bicep/modules/hubNetworking/mc-hubNetworking.parameters.example.json
 ```
 
-### PowerShell
+#### PowerShell
 
 ```powershell
 # For Azure global regions
 # Set Platform connectivity subscription ID as the the current subscription 
-$ConnectivitySubscriptionId = "[your platform management subscription ID]"
+$ConnectivitySubscriptionId = "[your platform connectivity subscription ID]"
 
 Select-AzSubscription -SubscriptionId $ConnectivitySubscriptionId
-
-New-AzResourceGroup -Name 'Hub_Networking_POC' `
-  -Location 'eastus'
   
 New-AzResourceGroupDeployment `
-  -TemplateFile infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep `
+  -TemplateFile infra-as-code/bicep/modules/hubNetworking/resources/hubNetworking.bicep `
   -TemplateParameterFile infra-as-code/bicep/modules/hubNetworking/hubNetworking.parameters.example.json `
   -ResourceGroupName 'Hub_Networking_POC'
 ```
@@ -122,18 +134,75 @@ OR
 ```powershell
 # For Azure China regions
 # Set Platform connectivity subscription ID as the the current subscription 
-$ConnectivitySubscriptionId = "[your platform management subscription ID]"
+$ConnectivitySubscriptionId = "[your platform connectivity subscription ID]"
 
 Select-AzSubscription -SubscriptionId $ConnectivitySubscriptionId
-
-New-AzResourceGroup -Name 'Hub_Networking_POC' `
-  -Location 'chinaeast2'
   
 New-AzResourceGroupDeployment `
-  -TemplateFile infra-as-code/bicep/modules/hubNetworking/hubNetworking.bicep `
+  -TemplateFile infra-as-code/bicep/modules/hubNetworking/resources/hubNetworking.bicep `
   -TemplateParameterFile infra-as-code/bicep/modules/hubNetworking/mc-hubNetworking.parameters.example.json `
   -ResourceGroupName 'Hub_Networking_POC'
 ```
+
+### Resource Group and Module Resources
+
+To deploy the resource group and the module resources, use one of the following options.
+
+#### Azure CLI
+```bash
+# For Azure global regions
+# Set Platform connectivity subscription ID as the the current subscription 
+ConnectivitySubscriptionId="[your platform connectivity subscription ID]"
+az account set --subscription $ConnectivitySubscriptionId
+
+az deployment sub create \
+  --location eastus \
+  --template-file infra-as-code/bicep/modules/hubNetworking/resourceGroup/hubNetworkingResourceGroup.bicep \
+  --parameters @infra-as-code/bicep/modules/hubNetworking/hubNetworking.parameters.example.json parResourceGroupName=Hub_Networking_POC
+```
+OR
+```bash
+# For Azure China regions
+# Set Platform connectivity subscription ID as the the current subscription 
+ConnectivitySubscriptionId="[your platform connectivity subscription ID]"
+az account set --subscription $ConnectivitySubscriptionId
+
+az group create --location chinaeast2 \
+   --name Hub_Networking_POC
+
+az deployment group create \
+   --template-file infra-as-code/bicep/modules/hubNetworking/resourceGroup/hubNetworking.bicep \
+   --parameters @infra-as-code/bicep/modules/hubNetworking/mc-hubNetworking.parameters.example.json parResourceGroupName=Hub_Networking_POC
+```
+
+#### PowerShell
+
+```powershell
+# For Azure global regions
+# Set Platform connectivity subscription ID as the the current subscription 
+$ConnectivitySubscriptionId = "[your platform management subscription ID]"
+
+Select-AzSubscription -SubscriptionId $ConnectivitySubscriptionId
+  
+New-AzSubscriptionDeployment `
+  -TemplateFile infra-as-code/bicep/modules/hubNetworking/resourceGroup/hubNetworking.bicep `
+  -TemplateParameterFile infra-as-code/bicep/modules/hubNetworking/hubNetworking.parameters.example.json `
+  -parResourceGroupName 'Hub_Networking_POC'
+```
+OR
+```powershell
+# For Azure China regions
+# Set Platform connectivity subscription ID as the the current subscription 
+$ConnectivitySubscriptionId = "[your platform management subscription ID]"
+
+Select-AzSubscription -SubscriptionId $ConnectivitySubscriptionId
+  
+New-AzSubscriptionDeployment `
+  -TemplateFile infra-as-code/bicep/modules/hubNetworking/resourceGroup/hubNetworking.bicep `
+  -TemplateParameterFile infra-as-code/bicep/modules/hubNetworking/mc-hubNetworking.parameters.example.json `
+  -parResourceGroupName 'Hub_Networking_POC'
+```
+
 ## Example Output in Azure global regions
 
 ![Example Deployment Output](media/hubNetworkExampleDeploymentOutput.png "Example Deployment Output in Azure global regions")
