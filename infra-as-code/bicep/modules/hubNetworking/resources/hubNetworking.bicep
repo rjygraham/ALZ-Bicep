@@ -236,7 +236,7 @@ resource resHubVirtualNetwork 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   }
 }
 
-module modBastionPublicIP '../publicIp/publicIp.bicep' = if (parBastionEnabled) {
+module modBastionPublicIP '../../publicIp/publicIp.bicep' = if (parBastionEnabled) {
   name: 'deploy-Bastion-Public-IP'
   params: {
     parLocation: parLocation
@@ -291,7 +291,7 @@ resource resGatewaySubnetRef 'Microsoft.Network/virtualNetworks/subnets@2021-02-
   name: 'GatewaySubnet'
 }
 
-module modGatewayPublicIP '../publicIp/publicIp.bicep' = [for (gateway, i) in varGwConfig: if ((gateway.name != 'noconfigVpn') && (gateway.name != 'noconfigEr')) {
+module modGatewayPublicIP '../../publicIp/publicIp.bicep' = [for (gateway, i) in varGwConfig: if ((gateway.name != 'noconfigVpn') && (gateway.name != 'noconfigEr')) {
   name: 'deploy-Gateway-Public-IP-${i}'
   params: {
     parLocation: parLocation
@@ -348,7 +348,7 @@ resource resAzureFirewallSubnetRef 'Microsoft.Network/virtualNetworks/subnets@20
   name: 'AzureFirewallSubnet'
 }
 
-module modAzureFirewallPublicIP '../publicIp/publicIp.bicep' = if (parAzureFirewallEnabled) {
+module modAzureFirewallPublicIP '../../publicIp/publicIp.bicep' = if (parAzureFirewallEnabled) {
   name: 'deploy-Firewall-Public-IP'
   params: {
     parLocation: parLocation
@@ -465,7 +465,7 @@ resource resVirtualNetworkLink 'Microsoft.Network/privateDnsZones/virtualNetwork
 }]
 
 // Optional Deployment for Customer Usage Attribution
-module modCustomerUsageAttribution '../../CRML/customerUsageAttribution/cuaIdResourceGroup.bicep' = if (!parTelemetryOptOut) {
+module modCustomerUsageAttribution '../../../CRML/customerUsageAttribution/cuaIdResourceGroup.bicep' = if (!parTelemetryOptOut) {
   #disable-next-line no-loc-expr-outside-params //Only to ensure telemetry data is stored in same location as deployment. See https://github.com/Azure/ALZ-Bicep/wiki/FAQ#why-are-some-linter-rules-disabled-via-the-disable-next-line-bicep-function for more information
   name: 'pid-${varCuaid}-${uniqueString(resourceGroup().location)}'
   params: {}
